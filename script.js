@@ -27,6 +27,7 @@ let selectedProductForSale = null;
 let apiKey = '';
 let productForPriceEntry = null;
 let currentActivePage = 'homepage'; // Default to homepage
+let editingItemId = null; // To track which item is being edited
 
 // --- APP STARTUP & AUTHENTICATION ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -40,15 +41,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
     auth.onAuthStateChanged(user => {
         if (user) {
+            // User is logged in
             document.getElementById('user_email_display').textContent = user.email;
-            shopDataRef = db.collection('shops').doc('mahavirShopData');
+            
+            // This is the key change for per-account data
+            // It creates a unique data store for each user based on their ID
+            shopDataRef = db.collection('shops').doc(user.uid);
+            
             setupRealtimeListener();
+
             document.getElementById('main_app_container').classList.remove('hidden');
             document.getElementById('auth_container').classList.add('hidden');
             document.getElementById('loading_container').classList.add('hidden');
+
         } else {
+            // User is logged out
             if (unsubscribe) unsubscribe();
             stock = []; categories = []; salesLog = []; repairLog = []; rechargeLog = []; apiKey = '';
+
             document.getElementById('main_app_container').classList.add('hidden');
             document.getElementById('auth_container').classList.remove('hidden');
             document.getElementById('loading_container').classList.add('hidden');
@@ -65,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
 
 function setAuthError(message) {
     document.getElementById('auth_error').textContent = message;
@@ -114,7 +125,7 @@ function setupRealtimeListener() {
             apiKey = data.apiKey || '';
             categories = data.categories || ["Mobile Accessory", "Repair Part", "SIM Card", "Other"];
         } else {
-            console.log("No data in Firestore. Initializing document.");
+            console.log("No data in Firestore. Initializing document for this user.");
             categories = ["Mobile Accessory", "Repair Part", "SIM Card", "Speakers", "Buds", "Earphones", "Other"];
             saveData();
         }
@@ -184,7 +195,6 @@ function navigate(pageId) {
             break;
     }
 }
-
 // --- HOMEPAGE ---
 function renderHomepage() {
     const today = new Date().toISOString().split('T')[0];
@@ -207,7 +217,6 @@ function renderHomepage() {
         lowStockList.innerHTML = '<p class="text-gray-400">No low stock items. Great job!</p>';
     }
 }
-
 // --- UTILITY & MODAL FUNCTIONS ---
 function showStatus(elementId, message, isError = false) {
     const el = document.getElementById(elementId);
@@ -283,12 +292,14 @@ async function saveStockItem() {
     const name = document.getElementById('product_name').value.trim();
     const barcode = document.getElementById('barcode').value.trim();
     const category = document.getElementById('product_category').value;
-    const purchasePrice = parseFloat(document.getElementById('purchase_price').value);
+    const purchasePrice = parseFloat(document.getElementById('purchase_price').value) || 0;
     const quantity = parseInt(document.getElementById('quantity').value);
 
-    if(!name || !category || isNaN(purchasePrice) || isNaN(quantity) || purchasePrice < 0 || quantity < 0) {
-        showStatus('stock_status', 'Please fill all fields with valid values.', true); return;
+    if(!name || !category || isNaN(quantity) || quantity < 0) {
+        showStatus('stock_status', 'Please fill Product Name, Category, and a valid Quantity.', true); 
+        return;
     }
+
     if (barcode && stock.find(item => item.barcode === barcode)) {
         showStatus('stock_status', 'Error: This barcode is already assigned.', true); return;
     }
@@ -311,18 +322,32 @@ async function saveStockItem() {
         document.getElementById('quantity').value = '';
     }
 }
+
 function renderInventory() {
     const listEl = document.getElementById('inventory_list');
     const filter = document.getElementById('inventory_category_filter').value;
     const filteredStock = (filter === 'All Categories') ? stock : stock.filter(item => item.category === filter);
     listEl.innerHTML = '';
     if (filteredStock.length === 0) {
-        listEl.innerHTML = '<div class="text-center text-gray-500 p-4 col-span-6">No items in inventory.</div>'; return;
+        listEl.innerHTML = '<div class="text-center text-gray-500 p-4 col-span-7">No items in inventory.</div>'; return;
     }
     filteredStock.forEach(item => {
-        listEl.innerHTML += `<div class="grid grid-cols-6 gap-4 items-center bg-gray-700 p-2 rounded"><div class="col-span-2 truncate">${item.name}</div><div class="truncate">${item.barcode || '-'}</div><div class="truncate">${item.category}</div><div class="text-center">${item.quantity}</div><div class="text-center space-x-2"><button onclick="openAdjustQuantityModal(${item.id})" class="bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded">Adjust</button><button onclick="confirmRemoveItem(${item.id})" class="bg-red-600 hover:bg-red-500 text-xs px-2 py-1 rounded">Remove</button></div></div>`;
+        listEl.innerHTML += `
+            <div class="grid grid-cols-7 gap-4 items-center bg-gray-700 p-2 rounded">
+                <div class="col-span-2 truncate">${item.name}</div>
+                <div class="truncate">${item.barcode || '-'}</div>
+                <div class="truncate">${item.category}</div>
+                <div class="text-right">${formatCurrency(item.purchasePrice)}</div>
+                <div class="text-center">${item.quantity}</div>
+                <div class="text-center space-x-1">
+                    <button onclick="openEditStockModal(${item.id})" class="bg-yellow-600 hover:bg-yellow-500 text-white font-bold text-xs px-2 py-1 rounded">Edit</button>
+                    <button onclick="openAdjustQuantityModal(${item.id})" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-2 py-1 rounded">Adjust</button>
+                    <button onclick="confirmRemoveItem(${item.id})" class="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-2 py-1 rounded">Remove</button>
+                </div>
+            </div>`;
     });
 }
+
 function confirmRemoveItem(itemId) {
     const item = stock.find(i => i.id === itemId);
     if(!item) return;
@@ -354,6 +379,69 @@ async function adjustQuantity(itemId) {
     showStatus('inventory_status', `Stock for "${item.name}" updated.`);
 }
 function closeAdjustQuantityModal() { document.getElementById('adjust_quantity_modal').classList.remove('flex'); }
+
+function openEditStockModal(itemId) {
+    editingItemId = itemId;
+    const item = stock.find(i => i.id === itemId);
+    if (!item) return;
+
+    // Populate category dropdown
+    const categorySelect = document.getElementById('edit_product_category');
+    categorySelect.innerHTML = '';
+    categories.forEach(cat => {
+        categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+    });
+
+    // Set form values
+    document.getElementById('edit_product_name').value = item.name;
+    document.getElementById('edit_barcode').value = item.barcode || '';
+    document.getElementById('edit_product_category').value = item.category;
+    document.getElementById('edit_purchase_price').value = item.purchasePrice;
+
+    // Set up save button
+    document.getElementById('save_changes_btn').onclick = saveStockChanges;
+
+    // Show modal
+    document.getElementById('edit_stock_modal').classList.add('flex');
+}
+
+function closeEditStockModal() {
+    editingItemId = null;
+    document.getElementById('edit_stock_modal').classList.remove('flex');
+}
+
+async function saveStockChanges() {
+    if (!editingItemId) return;
+
+    const item = stock.find(i => i.id === editingItemId);
+    if (!item) return;
+
+    const newName = document.getElementById('edit_product_name').value.trim();
+    const newBarcode = document.getElementById('edit_barcode').value.trim();
+    const newCategory = document.getElementById('edit_product_category').value;
+    const newPurchasePrice = parseFloat(document.getElementById('edit_purchase_price').value) || 0;
+
+    if (!newName) {
+        showStatus('edit_stock_status', 'Product name cannot be empty.', true);
+        return;
+    }
+
+    if (newBarcode && newBarcode !== item.barcode && stock.some(s => s.id !== editingItemId && s.barcode === newBarcode)) {
+        showStatus('edit_stock_status', 'This barcode is already in use by another item.', true);
+        return;
+    }
+    
+    // Update item properties
+    item.name = newName;
+    item.barcode = newBarcode;
+    item.category = newCategory;
+    item.purchasePrice = newPurchasePrice;
+
+    await saveData();
+    closeEditStockModal();
+    showStatus('inventory_status', `"${item.name}" was updated successfully.`);
+}
+
 
 // --- RECORD SALE ---
 function openSellPriceModal(product) {
@@ -642,10 +730,10 @@ function generatePDFReport() {
 // --- SETTINGS & BACKUP ---
 async function saveApiKey() { apiKey = document.getElementById('api_key_input').value.trim(); await saveData(); showStatus('api_key_status', 'API Key saved.'); }
 function promptResetAllData() {
-    showConfirmModal("Reset all cloud data? This cannot be undone.", async () => {
+    showConfirmModal("Reset all cloud data for this account? This cannot be undone.", async () => {
         stock = []; categories = ["Other"]; salesLog = []; repairLog = []; rechargeLog = []; apiKey = '';
         await saveData();
-        showStatus('api_key_status', 'Cloud data has been reset.');
+        showStatus('api_key_status', 'Cloud data for this account has been reset.');
     });
 }
 function saveBackupToFile() {
