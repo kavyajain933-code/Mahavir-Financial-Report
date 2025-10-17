@@ -1,0 +1,116 @@
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for better aesthetics */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #1a202c; /* Even darker gray */
+}
+::-webkit-scrollbar-thumb {
+    background: #4a5568;
+    border-radius: 10px;
+    border: 2px solid #1a202c;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #718096;
+}
+
+/* Sidebar button enhancements */
+.sidebar-btn {
+    position: relative;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.sidebar-btn:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 0;
+    width: 4px;
+    background-color: #48bb78; /* Green accent */
+    border-radius: 2px;
+    transition: height 0.2s ease-in-out;
+}
+
+.sidebar-btn.active,
+.sidebar-btn:hover {
+    background-color: rgba(74, 85, 104, 0.2); /* Subtle hover */
+}
+
+.sidebar-btn.active {
+    color: #f7fafc; /* Brighter text for active */
+    font-weight: 600;
+}
+
+.sidebar-btn.active:before {
+    height: 60%;
+}
+
+/* Modal animation */
+.modal {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.modal.flex {
+    display: flex;
+    opacity: 1;
+}
+
+.modal > div {
+    transform: scale(0.95);
+    transition: transform 0.3s ease-in-out;
+}
+
+.modal.flex > div {
+    transform: scale(1);
+}
+
+
+/* General button styling */
+button {
+    transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Gradient buttons */
+.bg-green-600 {
+    background-image: linear-gradient(to right, #38a169, #48bb78);
+}
+.bg-blue-600 {
+    background-image: linear-gradient(to right, #3182ce, #4299e1);
+}
+
+/* Input field focus state */
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.4);
+}
+
+
+/* Styles for the AI summary content */
+#ai_summary_content ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+#ai_summary_content li {
+    margin-bottom: 8px;
+}
+
+#ai_summary_content strong {
+    color: #a7f3d0; /* A light green to make it pop */
+}
+
