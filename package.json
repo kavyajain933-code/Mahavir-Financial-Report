@@ -1,6 +1,6 @@
 {
   "name": "mahavir-financial-report",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Inventory management for Mahavir Mobile Shop",
   "main": "main.js",
   "repository": {
@@ -20,7 +20,8 @@
     },
     "win": {
       "verifyUpdateCodeSignature": false
-    }
+    },
+    "artifactName": "mahavir-shop-setup-${version}.${ext}"
   },
   "keywords": [],
   "author": "",
