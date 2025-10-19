@@ -47,7 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             document.getElementById('user_email_display').textContent = user.email;
             shopDataRef = db.collection('shops').doc(user.uid);
-            setupRealtimeListener();
+            
+            // NEW: Robust data initialization and listener setup
+            initializeAppAndListen();
+
             document.getElementById('main_app_container').classList.remove('hidden');
             document.getElementById('auth_container').classList.add('hidden');
             document.getElementById('loading_container').classList.add('hidden');
@@ -160,33 +163,47 @@ function handleLogout() {
     auth.signOut();
 }
 
-// --- DATA PERSISTENCE (FIRESTORE) ---
-function setupRealtimeListener() {
-    unsubscribe = shopDataRef.onSnapshot(doc => {
-        if (doc.exists) {
-            const data = doc.data();
-            stock = data.stock || [];
-            salesLog = data.salesLog || [];
-            repairLog = data.repairLog || [];
-            rechargeLog = data.rechargeLog || [];
-            apiKey = data.apiKey || '';
-            categories = data.categories || ["Mobile Accessory", "Repair Part", "SIM Card", "Other"];
-        } else {
-            console.log("No data in Firestore. Initializing document for this user.");
-            categories = ["Mobile Accessory", "Repair Part", "SIM Card", "Speakers", "Buds", "Earphones", "Other"];
-            saveData();
-        }
+// --- NEW ROBUST DATA INITIALIZATION ---
+async function initializeAppAndListen() {
+    // First, get the document once to check if it exists
+    const doc = await shopDataRef.get();
+
+    if (!doc.exists) {
+        console.log("No data in Firestore. Creating initial document for this user.");
+        // If it doesn't exist, create it with default data and wait for it to complete
+        await shopDataRef.set({
+            stock: [],
+            salesLog: [],
+            repairLog: [],
+            rechargeLog: [],
+            apiKey: '',
+            categories: ["Mobile Accessory", "Repair Part", "SIM Card", "Speakers", "Buds", "Earphones", "Other"]
+        });
+    }
+
+    // Now that we're sure the document exists, attach the real-time listener
+    unsubscribe = shopDataRef.onSnapshot(snapshot => {
+        const data = snapshot.data();
+        stock = data.stock || [];
+        salesLog = data.salesLog || [];
+        repairLog = data.repairLog || [];
+        rechargeLog = data.rechargeLog || [];
+        apiKey = data.apiKey || '';
+        categories = data.categories || ["Mobile Accessory", "Repair Part", "SIM Card", "Other"];
+        
+        // This re-renders the current view with fresh data from the cloud
         navigate(currentActivePage);
     }, error => {
         console.error("Error listening to shop data:", error);
     });
 }
 
+
 async function saveData() {
     if (!shopDataRef) return;
     try {
         const dataToSave = { stock, categories, salesLog, repairLog, rechargeLog, apiKey };
-        await shopDataRef.set(dataToSave, { merge: true });
+        await shopDataRef.set(dataToSave, { merge: true }); // Use merge to be safe
     } catch (error) {
         console.error("Error saving data to Firestore:", error);
     }
@@ -209,7 +226,10 @@ function navigate(pageId) {
     switch(pageId) {
         case 'homepage': renderHomepage(); break;
         case 'add_stock': renderCategoryDropdowns(); break;
-        case 'check_inventory': renderInventory(); break;
+        case 'check_inventory': 
+            renderCategoryDropdowns(); // BUG FIX: Ensure dropdowns are populated first
+            renderInventory(); 
+            break;
         case 'record_sale': 
             if(document.getElementById('barcode_scan_input')) document.getElementById('barcode_scan_input').focus();
             break;
@@ -242,6 +262,7 @@ function navigate(pageId) {
             break;
     }
 }
+
 // --- HOMEPAGE ---
 function renderHomepage() {
     const today = new Date().toISOString().split('T')[0];
@@ -264,6 +285,7 @@ function renderHomepage() {
         lowStockList.innerHTML = '<p class="text-gray-400">No low stock items. Great job!</p>';
     }
 }
+
 // --- UTILITY & MODAL FUNCTIONS ---
 function updateClock() {
     const now = new Date();
