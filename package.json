@@ -31,21 +31,4 @@
     "electron-updater": "^6.2.1"
   }
 }
-```
-
-### Next Steps (Very Important)
-
-Now that the configuration is correct, you need to rebuild and republish your application.
-
-1.  **Update `package.json`:** Replace your old `package.json` content with the code above.
-
-2.  **Run `npm install`:** Open your **Administrator PowerShell** window in your project folder and run this command. This will update your `node_modules` folder based on the corrected file.
-    ```powershell
-    npm install
-    ```
-
-3.  **Build the App Again:** Now, run the build command to create a new, corrected installer.
-    ```powershell
-    npm run build
-    
 
