@@ -28,6 +28,7 @@ let apiKey = '';
 let productForPriceEntry = null;
 let currentActivePage = 'homepage'; // Default to homepage
 let editingItemId = null; // To track which item is being edited
+let updateInfo = null; // To store available update info
 
 // --- APP STARTUP & AUTHENTICATION ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -41,23 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     auth.onAuthStateChanged(user => {
         if (user) {
-            // User is logged in
             document.getElementById('user_email_display').textContent = user.email;
-            
-            // Per-account data storage
             shopDataRef = db.collection('shops').doc(user.uid);
-            
             setupRealtimeListener();
-
             document.getElementById('main_app_container').classList.remove('hidden');
             document.getElementById('auth_container').classList.add('hidden');
             document.getElementById('loading_container').classList.add('hidden');
-
         } else {
-            // User is logged out
             if (unsubscribe) unsubscribe();
             stock = []; categories = []; salesLog = []; repairLog = []; rechargeLog = []; apiKey = '';
-
             document.getElementById('main_app_container').classList.add('hidden');
             document.getElementById('auth_container').classList.remove('hidden');
             document.getElementById('loading_container').classList.add('hidden');
@@ -76,14 +69,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Updater IPC Listeners ---
     if (window.electronAPI) {
+        // Listen for the update_available message from the main process
         window.electronAPI.onUpdateAvailable((info) => {
-            showConfirmModal(`A new update (v${info.version}) is available. Do you want to download and install it now?`, () => {
-                const modal = document.getElementById('update_modal');
-                modal.classList.add('flex');
-                window.electronAPI.startDownload();
-            });
+            updateInfo = info; // Store update info
+            const updateBell = document.getElementById('update_notification_bell');
+            updateBell.classList.remove('hidden');
+            updateBell.onclick = () => {
+                showConfirmModal(`A new update (v${info.version}) is available. Download now?`, () => {
+                    const modal = document.getElementById('update_modal');
+                    modal.classList.add('flex');
+                    window.electronAPI.startDownload();
+                });
+            };
         });
 
+        // Listen for download progress
         window.electronAPI.onDownloadProgress((progressObj) => {
             const progressBar = document.getElementById('progress_bar');
             const updateDetails = document.getElementById('update_details');
@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDetails.textContent = `Downloading at ${speed} MB/s (${downloaded} MB / ${total} MB)`;
         });
 
+        // Listen for the update downloaded message
         window.electronAPI.onUpdateDownloaded(() => {
             document.getElementById('update_title').textContent = 'Update Ready';
             document.getElementById('update_message').textContent = 'The new version has been downloaded. Restart the application to apply the update.';
@@ -108,13 +109,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.electronAPI.restartApp();
             };
         });
-
+        
+        // Listen for update errors
         window.electronAPI.onUpdateError((err) => {
             console.error('Update Error:', err);
             const modal = document.getElementById('update_modal');
             modal.classList.remove('flex');
-            // You might want a more user-friendly error message here
-            alert('An error occurred during the update process. Please check the logs.');
+            showStatus('update_check_status', 'Update failed. Check logs.', true);
+        });
+
+        // Listen for the result of a manual check
+        window.electronAPI.onUpdateNotAvailable(() => {
+            showStatus('update_check_status', 'You are on the latest version.', false);
         });
     }
 });
@@ -329,6 +335,9 @@ function renderCategoryDropdowns() {
         }
     });
 }
+
+// All other functions (saveStockItem, renderInventory, recordSale, reports, etc.) remain unchanged
+// They are included here for completeness but are not the focus of this update.
 
 // --- STOCK MANAGEMENT ---
 async function saveStockItem() {
@@ -811,7 +820,6 @@ async function getCustomAIInsight() {
     summaryContainer.classList.remove('hidden');
     summaryContent.innerHTML = '<p>Processing your custom query...</p>';
 
-    // Prepare data for the AI
     const dataForAI = {
         inventory: stock.map(({ name, quantity, purchasePrice }) => ({ name, quantity, purchasePrice })),
         sales: salesLog.map(({ productName, quantity, sellPrice, profit, timestamp }) => ({ productName, quantity, sellPrice, profit, date: new Date(timestamp).toLocaleDateString() })),
@@ -856,6 +864,12 @@ async function getCustomAIInsight() {
     } catch (e) {
         console.error("Custom AI Insights Error:", e);
         summaryContent.innerHTML = `<p class="text-red-400">Failed to get AI insights. Error: ${e.message}</p>`;
+    }
+}
+function checkForUpdate() {
+    showStatus('update_check_status', 'Checking for updates...', false);
+    if (window.electronAPI) {
+        window.electronAPI.checkForUpdate();
     }
 }
 

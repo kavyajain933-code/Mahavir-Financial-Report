@@ -1,28 +1,17 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-// Expose a secure, limited API to the renderer process (your script.js)
-// This is the modern and recommended way to handle communication in Electron.
+// Expose a safe, limited version of ipcRenderer to the renderer process (your script.js)
 contextBridge.exposeInMainWorld('electronAPI', {
-  // --- Functions to receive messages from the main process ---
-
-  // Listens for the 'update_available' message from main.js
-  onUpdateAvailable: (callback) => ipcRenderer.on('update_available', (event, ...args) => callback(...args)),
-  
-  // Listens for 'download_progress' messages to update the progress bar
-  onDownloadProgress: (callback) => ipcRenderer.on('download_progress', (event, ...args) => callback(...args)),
-
-  // Listens for the 'update_downloaded' message when the download is complete
-  onUpdateDownloaded: (callback) => ipcRenderer.on('update_downloaded', (event, ...args) => callback(...args)),
-
-  // Listens for any errors during the update process
-  onUpdateError: (callback) => ipcRenderer.on('update_error', (event, ...args) => callback(...args)),
-
-  // --- Functions to send messages to the main process ---
-
-  // Sends a message to start the download when the user clicks "Yes"
+  // Functions to send messages from renderer to main
   startDownload: () => ipcRenderer.send('start-download'),
-
-  // Sends a message to restart the app when the user clicks "Restart & Install"
   restartApp: () => ipcRenderer.send('restart-app'),
+  checkForUpdate: () => ipcRenderer.send('check-for-update'),
+
+  // Functions to listen for messages from main to renderer
+  onUpdateAvailable: (callback) => ipcRenderer.on('update_available', (event, ...args) => callback(...args)),
+  onDownloadProgress: (callback) => ipcRenderer.on('download_progress', (event, ...args) => callback(...args)),
+  onUpdateDownloaded: (callback) => ipcRenderer.on('update_downloaded', (event, ...args) => callback(...args)),
+  onUpdateError: (callback) => ipcRenderer.on('update_error', (event, ...args) => callback(...args)),
+  onUpdateNotAvailable: (callback) => ipcRenderer.on('update_not_available', (event, ...args) => callback(...args)),
 });
 

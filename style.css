@@ -1,16 +1,16 @@
-/* --- General Body & Font --- */
+/* General Body & Font */
 body {
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- Custom Scrollbar --- */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: #1a202c; /* Even darker gray */
+    background: #1a202c; /* Even darker gray for track */
 }
 ::-webkit-scrollbar-thumb {
     background: #4a5568;
@@ -21,98 +21,87 @@ body {
     background: #718096;
 }
 
-/* --- Sidebar --- */
+/* Sidebar Styles */
 .sidebar-btn.active {
-    background-color: #2d3748; /* Darker gray for active state */
+    background-color: #2d3748; /* Darker highlight */
+    color: #48bb78; /* Green text for active */
     font-weight: 600;
-    --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
-    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
-
 .sidebar-btn {
-    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-}
-.sidebar-btn:hover {
-    background-color: #4a5568;
-}
-.sidebar-btn:active {
-    transform: scale(0.98);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
-
-/* --- General Modals --- */
+/* Modal Styles with Animation */
 .modal {
-    display: none; /* Hidden by default, toggled by JS */
-    animation: fadeIn 0.3s ease-out forwards;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
-
 .modal.flex {
     display: flex;
+    opacity: 1;
+}
+.modal > div { /* Target the direct child div of the modal */
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+.modal.flex > div {
+    transform: scale(1);
 }
 
-/* Modal Fade-in Animation */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* --- General Buttons & Inputs --- */
+/* General Button and Input Enhancements */
 button {
     transition: all 0.2s ease-in-out;
 }
 
-button:hover {
-    filter: brightness(1.1);
-}
-
-button:active {
-    transform: scale(0.97);
-}
-
-input:focus, select:focus {
-    box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.5);
-    border-color: #3182ce;
-}
-
-/* --- Homepage Specific --- */
-.quick-action-btn {
-    background: linear-gradient(to right, #4a5568, #2d3748);
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    text-align: center;
-    font-weight: 600;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-.quick-action-btn:hover {
-    background: linear-gradient(to right, #5a6578, #3d4758);
-}
-
-
-/* --- AI Summary Content Formatting --- */
+/* AI Summary Content */
 #ai_summary_content ul {
     list-style-type: disc;
     margin-left: 20px;
     margin-top: 10px;
 }
-
 #ai_summary_content li {
     margin-bottom: 8px;
 }
-
 #ai_summary_content strong {
-    color: #a7f3d0; /* A light green to make it pop */
+    color: #a7f3d0;
 }
 
-/* --- Update Progress Bar Transition --- */
+/* Homepage Quick Action Buttons */
+.quick-action-btn {
+    @apply w-full text-left bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200;
+}
+
+
+/* --- NEW: Update Notification Bell Styles --- */
+.bell-icon {
+    position: relative;
+    animation: bell-ring 2s ease-in-out infinite;
+}
+
+.bell-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444; /* Bright red */
+    border-radius: 50%;
+    border: 1px solid #f9fafb;
+}
+
+@keyframes bell-ring {
+    0%, 100% { transform: rotate(0); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(15deg); }
+    20%, 40%, 60%, 80% { transform: rotate(-15deg); }
+}
+
+/* --- NEW: Update Progress Bar --- */
+#progress_bar_container {
+    transition: opacity 0.3s ease;
+}
+
 #progress_bar {
-    transition: width 0.3s ease-in-out;
+    transition: width 0.5s ease;
 }
 

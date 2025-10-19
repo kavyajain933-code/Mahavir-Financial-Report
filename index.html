@@ -53,7 +53,6 @@
         <div class="w-72 bg-gray-800 p-5 flex flex-col fixed h-full shadow-lg">
             <h1 class="text-2xl font-bold mb-2 text-center text-green-400">Mahavir Mobile Shop</h1>
             <div class="text-center text-gray-400 text-sm truncate mb-4" id="user_email_display"></div>
-            <!-- Make the nav scrollable if content overflows -->
             <nav id="sidebar-nav" class="flex-grow mt-2 overflow-y-auto">
                 <button onclick="navigate('homepage')" class="sidebar-btn w-full text-left py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-200">Homepage</button>
                 <hr class="border-gray-700 my-2">
@@ -83,8 +82,18 @@
         </div>
 
         <!-- Main Content -->
-        <main class="flex-1 ml-72 p-8 overflow-y-auto">
+        <main class="flex-1 ml-72 p-8 overflow-y-auto relative">
             
+            <!-- Update Notification Bell -->
+            <div id="update_notification_bell" class="hidden fixed top-6 right-8 cursor-pointer">
+                <div class="bell-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-bell-fill text-yellow-400" viewBox="0 0 16 16">
+                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2.768 7.368A.5.5 0 0 0 .5 14h15a.5.5 0 0 0 .268-.932C13.5 12 13 7.098 13 6a5.002 5.002 0 0 0-4.005-4.901z"/>
+                    </svg>
+                    <div class="bell-dot"></div>
+                </div>
+            </div>
+
             <div id="homepage" class="page-content hidden">
                 <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -110,7 +119,6 @@
                     <div class="bg-gray-800 p-6 rounded-lg shadow-md">
                         <h2 class="text-xl font-bold text-red-400 mb-4">Low Stock Alerts (5 or less)</h2>
                         <div id="low_stock_list" class="space-y-2 max-h-48 overflow-y-auto">
-                            <!-- Low stock items will be injected here by JS -->
                         </div>
                     </div>
                 </div>
@@ -366,6 +374,14 @@
             <div id="settings" class="page-content hidden">
                 <h1 class="text-3xl font-bold mb-6">Settings</h1>
                 <div class="bg-gray-800 p-6 rounded-lg max-w-2xl shadow-md">
+                    <h2 class="text-xl font-bold mb-4 text-cyan-400">Application Updates</h2>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="checkForUpdate()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-6 rounded-md">Check for Updates</button>
+                        <p id="update_check_status" class="text-gray-400 h-6"></p>
+                    </div>
+
+                    <hr class="border-gray-600 my-6">
+
                     <h2 class="text-xl font-bold mb-4 text-blue-400">AI Configuration</h2>
                      <div class="mb-4">
                         <label for="api_key_input" class="block mb-2 font-medium">Your Gemini API Key</label>
@@ -492,7 +508,6 @@
         </div>
     </div>
     
-    <!-- New Update Progress Modal -->
     <div id="update_modal" class="fixed inset-0 bg-black bg-opacity-75 modal items-center justify-center p-4 z-50">
         <div class="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md text-center">
             <h2 id="update_title" class="text-2xl font-bold mb-4 text-green-400">Update in Progress</h2>
