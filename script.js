@@ -44,8 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // User is logged in
             document.getElementById('user_email_display').textContent = user.email;
             
-            // This is the key change for per-account data
-            // It creates a unique data store for each user based on their ID
+            // Per-account data storage
             shopDataRef = db.collection('shops').doc(user.uid);
             
             setupRealtimeListener();
@@ -72,6 +71,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 handleBarcodeScan();
             }
+        });
+    }
+
+    // --- Updater IPC Listeners ---
+    if (window.electronAPI) {
+        window.electronAPI.onUpdateAvailable((info) => {
+            showConfirmModal(`A new update (v${info.version}) is available. Do you want to download and install it now?`, () => {
+                const modal = document.getElementById('update_modal');
+                modal.classList.add('flex');
+                window.electronAPI.startDownload();
+            });
+        });
+
+        window.electronAPI.onDownloadProgress((progressObj) => {
+            const progressBar = document.getElementById('progress_bar');
+            const updateDetails = document.getElementById('update_details');
+            
+            progressBar.style.width = `${progressObj.percent}%`;
+            const speed = (progressObj.bytesPerSecond / 1024 / 1024).toFixed(2);
+            const downloaded = (progressObj.transferred / 1024 / 1024).toFixed(2);
+            const total = (progressObj.total / 1024 / 1024).toFixed(2);
+            
+            updateDetails.textContent = `Downloading at ${speed} MB/s (${downloaded} MB / ${total} MB)`;
+        });
+
+        window.electronAPI.onUpdateDownloaded(() => {
+            document.getElementById('update_title').textContent = 'Update Ready';
+            document.getElementById('update_message').textContent = 'The new version has been downloaded. Restart the application to apply the update.';
+            document.getElementById('progress_bar_container').classList.add('hidden');
+            document.getElementById('update_details').classList.add('hidden');
+
+            const restartButton = document.getElementById('restart_button');
+            restartButton.classList.remove('hidden');
+            restartButton.onclick = () => {
+                window.electronAPI.restartApp();
+            };
+        });
+
+        window.electronAPI.onUpdateError((err) => {
+            console.error('Update Error:', err);
+            const modal = document.getElementById('update_modal');
+            modal.classList.remove('flex');
+            // You might want a more user-friendly error message here
+            alert('An error occurred during the update process. Please check the logs.');
         });
     }
 });

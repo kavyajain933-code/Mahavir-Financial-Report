@@ -1,12 +1,13 @@
+/* --- General Body & Font --- */
 body {
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar for better aesthetics */
+/* --- Custom Scrollbar --- */
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
 }
 ::-webkit-scrollbar-track {
     background: #1a202c; /* Even darker gray */
@@ -20,86 +21,82 @@ body {
     background: #718096;
 }
 
-/* Sidebar button enhancements */
-.sidebar-btn {
-    position: relative;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-}
-
-.sidebar-btn:before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 0;
-    width: 4px;
-    background-color: #48bb78; /* Green accent */
-    border-radius: 2px;
-    transition: height 0.2s ease-in-out;
-}
-
-.sidebar-btn.active,
-.sidebar-btn:hover {
-    background-color: rgba(74, 85, 104, 0.2); /* Subtle hover */
-}
-
+/* --- Sidebar --- */
 .sidebar-btn.active {
-    color: #f7fafc; /* Brighter text for active */
+    background-color: #2d3748; /* Darker gray for active state */
     font-weight: 600;
+    --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-.sidebar-btn.active:before {
-    height: 60%;
+.sidebar-btn {
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+.sidebar-btn:hover {
+    background-color: #4a5568;
+}
+.sidebar-btn:active {
+    transform: scale(0.98);
 }
 
-/* Modal animation */
+
+/* --- General Modals --- */
 .modal {
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    display: none; /* Hidden by default, toggled by JS */
+    animation: fadeIn 0.3s ease-out forwards;
 }
 
 .modal.flex {
     display: flex;
-    opacity: 1;
 }
 
-.modal > div {
-    transform: scale(0.95);
-    transition: transform 0.3s ease-in-out;
+/* Modal Fade-in Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
-.modal.flex > div {
-    transform: scale(1);
-}
-
-
-/* General button styling */
+/* --- General Buttons & Inputs --- */
 button {
     transition: all 0.2s ease-in-out;
 }
 
 button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    filter: brightness(1.1);
 }
 
-/* Gradient buttons */
-.bg-green-600 {
-    background-image: linear-gradient(to right, #38a169, #48bb78);
-}
-.bg-blue-600 {
-    background-image: linear-gradient(to right, #3182ce, #4299e1);
+button:active {
+    transform: scale(0.97);
 }
 
-/* Input field focus state */
-input:focus, select:focus, textarea:focus {
-    box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.4);
+input:focus, select:focus {
+    box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.5);
+    border-color: #3182ce;
+}
+
+/* --- Homepage Specific --- */
+.quick-action-btn {
+    background: linear-gradient(to right, #4a5568, #2d3748);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.quick-action-btn:hover {
+    background: linear-gradient(to right, #5a6578, #3d4758);
 }
 
 
-/* Styles for the AI summary content */
+/* --- AI Summary Content Formatting --- */
 #ai_summary_content ul {
     list-style-type: disc;
     margin-left: 20px;
@@ -112,5 +109,10 @@ input:focus, select:focus, textarea:focus {
 
 #ai_summary_content strong {
     color: #a7f3d0; /* A light green to make it pop */
+}
+
+/* --- Update Progress Bar Transition --- */
+#progress_bar {
+    transition: width 0.3s ease-in-out;
 }
 

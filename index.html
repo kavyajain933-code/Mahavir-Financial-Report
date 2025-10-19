@@ -463,7 +463,6 @@
       </div>
    </div>
 
-   <!-- New Edit Stock Modal -->
     <div id="edit_stock_modal" class="fixed inset-0 bg-black bg-opacity-50 modal items-center justify-center p-4 z-50">
         <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-lg">
             <h2 class="text-xl font-bold mb-4">Edit Inventory Item</h2>
@@ -493,6 +492,24 @@
         </div>
     </div>
     
+    <!-- New Update Progress Modal -->
+    <div id="update_modal" class="fixed inset-0 bg-black bg-opacity-75 modal items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md text-center">
+            <h2 id="update_title" class="text-2xl font-bold mb-4 text-green-400">Update in Progress</h2>
+            <p id="update_message" class="text-gray-300 mb-6">Downloading new version...</p>
+            
+            <div id="progress_bar_container" class="w-full bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
+                <div id="progress_bar" class="bg-blue-600 h-4 rounded-full" style="width: 0%"></div>
+            </div>
+
+            <p id="update_details" class="text-sm text-gray-400 mb-6 h-5"></p>
+
+            <button id="restart_button" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-md text-lg hidden">
+                Restart & Install
+            </button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
