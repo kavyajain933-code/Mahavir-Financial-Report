@@ -51,6 +51,7 @@
     <div id="main_app_container" class="flex h-screen hidden">
         <!-- Sidebar -->
         <div class="w-72 bg-gray-800 p-5 flex flex-col fixed h-full shadow-lg">
+            <div id="clock" class="text-center text-2xl font-semibold text-gray-400 mb-2"></div>
             <h1 class="text-2xl font-bold mb-2 text-center text-green-400">Mahavir Mobile Shop</h1>
             <div class="text-center text-gray-400 text-sm truncate mb-4" id="user_email_display"></div>
             <nav id="sidebar-nav" class="flex-grow mt-2 overflow-y-auto">
@@ -408,6 +409,16 @@
                     <div class="flex justify-end">
                         <button onclick="promptResetAllData()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-md">Reset Account Data</button>
                     </div>
+                </div>
+            </div>
+            
+            <div id="game_corner" class="page-content hidden">
+                <h1 class="text-3xl font-bold mb-6">Game Corner</h1>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-md flex flex-col items-center">
+                    <h2 class="text-2xl font-bold text-yellow-400 mb-4">Breakout</h2>
+                    <canvas id="gameCanvas" width="480" height="320"></canvas>
+                    <div id="game_message" class="mt-4 text-lg h-6"></div>
+                    <button onclick="startGame()" class="mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-md">Start Game</button>
                 </div>
             </div>
 

@@ -3,92 +3,142 @@ body {
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    position: relative;
+    /* New Professional Background */
+    background-color: #0d1117;
+    background-image: radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%), radial-gradient(at 90% 90%, hsla(217, 34%, 17%, 1) 0, transparent 50%);
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-}
-::-webkit-scrollbar-track {
-    background: #1a202c; /* Even darker gray for track */
-}
-::-webkit-scrollbar-thumb {
-    background: #4a5568;
-    border-radius: 10px;
-    border: 2px solid #1a202c;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #718096;
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(26, 32, 44, 0.5); }
+::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 10px; border: 2px solid transparent; }
+::-webkit-scrollbar-thumb:hover { background: #718096; }
+
+/* --- Refined Glassmorphism Effect --- */
+.w-72.bg-gray-800 { /* Sidebar */
+    background-color: rgba(17, 24, 39, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset -1px 0px 0px rgba(255, 255, 255, 0.05);
 }
 
-/* Sidebar Styles */
-.sidebar-btn.active {
-    background-color: #2d3748; /* Darker highlight */
-    color: #48bb78; /* Green text for active */
-    font-weight: 600;
+.bg-gray-800 { /* Main Content Cards */
+    background-color: rgba(26, 32, 44, 0.6) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0px 1px 1px rgba(255, 255, 255, 0.05);
+    position: relative; 
+    overflow: hidden;   
 }
-.sidebar-btn {
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-}
-
-/* Modal Styles with Animation */
-.modal {
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-.modal.flex {
-    display: flex;
-    opacity: 1;
-}
-.modal > div { /* Target the direct child div of the modal */
+.modal > div { /* Modals */
+    background-color: rgba(26, 32, 44, 0.7) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transform: scale(0.95);
     transition: transform 0.3s ease;
 }
-.modal.flex > div {
-    transform: scale(1);
+
+/* Sidebar Styles */
+#sidebar-nav h2 {
+    margin-top: 1.25rem;
+}
+#user_email_display {
+    padding-bottom: 0.25rem;
 }
 
-/* General Button and Input Enhancements */
-button {
-    transition: all 0.2s ease-in-out;
+.sidebar-btn {
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-left 0.2s ease-in-out;
+    border-left: 3px solid transparent;
+    margin-bottom: 0.25rem;
+}
+.sidebar-btn:last-child {
+    margin-bottom: 0;
 }
 
-/* AI Summary Content */
-#ai_summary_content ul {
-    list-style-type: disc;
-    margin-left: 20px;
-    margin-top: 10px;
-}
-#ai_summary_content li {
-    margin-bottom: 8px;
-}
-#ai_summary_content strong {
-    color: #a7f3d0;
+.sidebar-btn.active {
+    background-image: linear-gradient(to right, rgba(72, 187, 120, 0.2), rgba(72, 187, 120, 0.05));
+    color: #48bb78;
+    font-weight: 600;
+    border-left: 3px solid #48bb78;
 }
 
-/* Homepage Quick Action Buttons */
+/* Modal Animation */
+.modal { display: none; opacity: 0; transition: opacity 0.3s ease; }
+.modal.flex { display: flex; opacity: 1; }
+.modal.flex > div { transform: scale(1); }
+
+/* --- Enhanced Button and Input Styles --- */
+button { transition: all 0.2s ease-in-out; }
+.bg-green-600, .bg-blue-600, .bg-purple-600, .bg-cyan-600, .bg-red-600, .bg-yellow-600 {
+    border: 1px solid transparent;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+.bg-green-600:hover { border-color: #38a169; box-shadow: 0 0 15px rgba(56, 161, 105, 0.5); }
+.bg-blue-600:hover { border-color: #2b6cb0; box-shadow: 0 0 15px rgba(43, 108, 176, 0.5); }
+.bg-purple-600:hover { border-color: #6b46c1; box-shadow: 0 0 15px rgba(107, 70, 193, 0.5); }
+.bg-cyan-600:hover { border-color: #0694a2; box-shadow: 0 0 15px rgba(6, 148, 162, 0.5); }
+.bg-red-600:hover { border-color: #c53030; box-shadow: 0 0 15px rgba(197, 48, 48, 0.5); }
+.bg-yellow-600:hover { border-color: #d69e2e; box-shadow: 0 0 15px rgba(214, 158, 46, 0.5); }
+
+/* Form Field Focus */
+input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="tel"], select, textarea {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(45, 55, 72, 0.5);
+}
+input:focus, select:focus, textarea:focus {
+    --tw-ring-opacity: 0.5;
+    box-shadow: 0 0 0 3px var(--tw-ring-color);
+    border-color: var(--tw-ring-color);
+    background-color: rgba(45, 55, 72, 0.7);
+}
+
+/* Table Readability */
+tbody tr:hover { background-color: rgba(74, 85, 104, 0.25); }
+
+/* Title Glow Effect */
+h1.text-3xl {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+/* --- Redesigned Homepage Quick Actions --- */
 .quick-action-btn {
-    @apply w-full text-left bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200;
+    width: 100%;
+    text-align: left;
+    background-color: rgba(55, 65, 81, 0.5);
+    color: white;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+}
+.quick-action-btn:hover {
+    background-color: rgba(75, 85, 99, 0.7);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+.quick-action-btn::before {
+    content: '›';
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+    color: #9ca3af;
+    transition: color 0.2s ease-in-out;
+}
+.quick-action-btn:hover::before {
+    color: white;
 }
 
-
-/* --- NEW: Update Notification Bell Styles --- */
-.bell-icon {
-    position: relative;
-    animation: bell-ring 2s ease-in-out infinite;
-}
-
-.bell-dot {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 8px;
-    height: 8px;
-    background-color: #ef4444; /* Bright red */
-    border-radius: 50%;
-    border: 1px solid #f9fafb;
-}
+/* --- Update Notification Bell Styles --- */
+.bell-icon { position: relative; animation: bell-ring 2s ease-in-out infinite; }
+.bell-dot { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; border: 1px solid #f9fafb; }
 
 @keyframes bell-ring {
     0%, 100% { transform: rotate(0); }
@@ -96,12 +146,51 @@ button {
     20%, 40%, 60%, 80% { transform: rotate(-15deg); }
 }
 
-/* --- NEW: Update Progress Bar --- */
-#progress_bar_container {
-    transition: opacity 0.3s ease;
+/* Update Progress Bar */
+#progress_bar_container { transition: opacity 0.3s ease; }
+#progress_bar { transition: width 0.5s ease; }
+
+
+/* --- PROFESSIONAL EASTER EGG STYLES --- */
+.bg-green-600:active, .bg-blue-600:active, .bg-purple-600:active, .bg-cyan-600:active {
+    animation: breathing-glow 1.5s ease-in-out infinite;
+}
+@keyframes breathing-glow {
+    0%, 100% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(255, 255, 255, 0.4); }
+}
+.bg-gray-800::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    transition: left 0.6s ease;
+}
+.bg-gray-800:hover::after {
+    left: 150%;
 }
 
-#progress_bar {
-    transition: width 0.5s ease;
+/* --- NEW: Professional Animated Gradient Title on Hover --- */
+h1.text-2xl.text-green-400 {
+    transition: all 0.4s ease;
+    background-size: 200% auto;
+    background-image: linear-gradient(to right, #6ee7b7 0%, #a7f3d0 50%, #6ee7b7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+}
+h1.text-2xl.text-green-400:hover {
+    background-position: right center; /* change the direction of the change here */
+}
+
+
+/* --- SCROLLBAR PADDING FIX --- */
+/* Applies padding to all elements with vertical scroll to prevent content from touching the scrollbar */
+[class*="overflow-y-auto"] {
+    padding-right: 0.75rem; /* 12px */
 }
 

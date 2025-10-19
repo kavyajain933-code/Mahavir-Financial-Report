@@ -32,6 +32,9 @@ let updateInfo = null; // To store available update info
 
 // --- APP STARTUP & AUTHENTICATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    updateClock(); // Initial clock update
+    setInterval(updateClock, 1000); // Update clock every second
+
     const loginBtn = document.getElementById('login_button');
     const signupBtn = document.getElementById('signup_button');
     const logoutBtn = document.getElementById('logout_button');
@@ -69,9 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Updater IPC Listeners ---
     if (window.electronAPI) {
-        // Listen for the update_available message from the main process
         window.electronAPI.onUpdateAvailable((info) => {
-            updateInfo = info; // Store update info
+            updateInfo = info;
             const updateBell = document.getElementById('update_notification_bell');
             updateBell.classList.remove('hidden');
             updateBell.onclick = () => {
@@ -83,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        // Listen for download progress
         window.electronAPI.onDownloadProgress((progressObj) => {
             const progressBar = document.getElementById('progress_bar');
             const updateDetails = document.getElementById('update_details');
@@ -96,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDetails.textContent = `Downloading at ${speed} MB/s (${downloaded} MB / ${total} MB)`;
         });
 
-        // Listen for the update downloaded message
         window.electronAPI.onUpdateDownloaded(() => {
             document.getElementById('update_title').textContent = 'Update Ready';
             document.getElementById('update_message').textContent = 'The new version has been downloaded. Restart the application to apply the update.';
@@ -110,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
         
-        // Listen for update errors
         window.electronAPI.onUpdateError((err) => {
             console.error('Update Error:', err);
             const modal = document.getElementById('update_modal');
@@ -118,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showStatus('update_check_status', 'Update failed. Check logs.', true);
         });
 
-        // Listen for the result of a manual check
         window.electronAPI.onUpdateNotAvailable(() => {
             showStatus('update_check_status', 'You are on the latest version.', false);
         });
@@ -267,6 +265,14 @@ function renderHomepage() {
     }
 }
 // --- UTILITY & MODAL FUNCTIONS ---
+function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+}
+
 function showStatus(elementId, message, isError = false) {
     const el = document.getElementById(elementId);
     if(!el) return;
@@ -335,9 +341,6 @@ function renderCategoryDropdowns() {
         }
     });
 }
-
-// All other functions (saveStockItem, renderInventory, recordSale, reports, etc.) remain unchanged
-// They are included here for completeness but are not the focus of this update.
 
 // --- STOCK MANAGEMENT ---
 async function saveStockItem() {
@@ -437,23 +440,17 @@ function openEditStockModal(itemId) {
     const item = stock.find(i => i.id === itemId);
     if (!item) return;
 
-    // Populate category dropdown
     const categorySelect = document.getElementById('edit_product_category');
     categorySelect.innerHTML = '';
     categories.forEach(cat => {
         categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
     });
 
-    // Set form values
     document.getElementById('edit_product_name').value = item.name;
     document.getElementById('edit_barcode').value = item.barcode || '';
     document.getElementById('edit_product_category').value = item.category;
     document.getElementById('edit_purchase_price').value = item.purchasePrice;
-
-    // Set up save button
     document.getElementById('save_changes_btn').onclick = saveStockChanges;
-
-    // Show modal
     document.getElementById('edit_stock_modal').classList.add('flex');
 }
 
@@ -464,10 +461,8 @@ function closeEditStockModal() {
 
 async function saveStockChanges() {
     if (!editingItemId) return;
-
     const item = stock.find(i => i.id === editingItemId);
     if (!item) return;
-
     const newName = document.getElementById('edit_product_name').value.trim();
     const newBarcode = document.getElementById('edit_barcode').value.trim();
     const newCategory = document.getElementById('edit_product_category').value;
@@ -477,13 +472,11 @@ async function saveStockChanges() {
         showStatus('edit_stock_status', 'Product name cannot be empty.', true);
         return;
     }
-
     if (newBarcode && newBarcode !== item.barcode && stock.some(s => s.id !== editingItemId && s.barcode === newBarcode)) {
         showStatus('edit_stock_status', 'This barcode is already in use by another item.', true);
         return;
     }
     
-    // Update item properties
     item.name = newName;
     item.barcode = newBarcode;
     item.category = newCategory;
@@ -493,7 +486,6 @@ async function saveStockChanges() {
     closeEditStockModal();
     showStatus('inventory_status', `"${item.name}" was updated successfully.`);
 }
-
 
 // --- RECORD SALE ---
 function openSellPriceModal(product) {
