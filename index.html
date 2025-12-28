@@ -127,9 +127,10 @@
             <div id="add_stock" class="page-content hidden">
                 <h1 class="text-3xl font-bold mb-6">Add New Inventory</h1>
                 <div class="bg-gray-800 p-6 rounded-lg max-w-2xl shadow-md">
-                    <div class="mb-4">
+                    <div class="mb-4 relative">
                         <label for="product_name" class="block mb-2 font-medium">Product Name</label>
-                        <input type="text" id="product_name" placeholder="e.g., iPhone 14 Screen Protector" class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <input type="text" id="product_name" onkeyup="filterStockSuggestions()" placeholder="Start typing to search existing..." class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <div id="stock_suggestions_box" class="hidden absolute w-full bg-gray-600 border border-gray-500 rounded-md z-10 max-h-40 overflow-y-auto shadow-lg mt-1"></div>
                     </div>
                      <div class="mb-4">
                         <label for="barcode" class="block mb-2 font-medium">Barcode (optional)</label>

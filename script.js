@@ -52,6 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if(signupBtn) signupBtn.addEventListener('click', handleSignup);
     if(logoutBtn) logoutBtn.addEventListener('click', handleLogout);
     
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+        const box = document.getElementById('stock_suggestions_box');
+        if (box && !e.target.closest('#product_name') && !e.target.closest('#stock_suggestions_box')) {
+            box.classList.add('hidden');
+        }
+    });
+
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('user_email_display').textContent = user.email;
@@ -330,7 +338,54 @@ function renderCategoryDropdowns() {
     });
 }
 
-// --- STOCK ---
+// --- STOCK & SEARCH ---
+
+// NEW: Search Logic for Add Stock
+function filterStockSuggestions() {
+    const input = document.getElementById('product_name');
+    const query = input.value.toLowerCase().trim();
+    const box = document.getElementById('stock_suggestions_box');
+    
+    if (query.length === 0) {
+        box.classList.add('hidden');
+        return;
+    }
+
+    const matches = stock.filter(item => item.name.toLowerCase().includes(query));
+    
+    if (matches.length > 0) {
+        box.innerHTML = matches.map(item => `
+            <div onclick="selectStockSuggestion('${item.id}')" class="p-2 hover:bg-gray-500 cursor-pointer border-b border-gray-500 last:border-0">
+                <span class="font-bold">${item.name}</span> <span class="text-xs text-gray-300">(${item.category})</span>
+            </div>
+        `).join('');
+        box.classList.remove('hidden');
+    } else {
+        box.classList.add('hidden');
+    }
+}
+
+// NEW: Fill form when suggestion selected
+function selectStockSuggestion(id) {
+    const item = stock.find(x => x.id == id); // Loose equality for string/number safety
+    if (!item) return;
+
+    document.getElementById('product_name').value = item.name;
+    document.getElementById('barcode').value = item.barcode || '';
+    
+    // Select category if exists
+    const catSelect = document.getElementById('product_category');
+    if (Array.from(catSelect.options).some(o => o.value === item.category)) {
+        catSelect.value = item.category;
+    }
+    
+    document.getElementById('purchase_price').value = item.purchasePrice || '';
+    document.getElementById('stock_suggestions_box').classList.add('hidden');
+    
+    // Focus quantity to let user quickly add more
+    document.getElementById('quantity').focus();
+}
+
 async function saveStockItem() {
     const name = document.getElementById('product_name').value.trim();
     const barcode = document.getElementById('barcode').value.trim();
@@ -339,18 +394,35 @@ async function saveStockItem() {
     const qty = parseInt(document.getElementById('quantity').value);
     
     if(!name || !cat || isNaN(qty) || qty < 0) { showStatus('stock_status', 'Check fields.', true); return; }
-    if (barcode && stock.find(i => i.barcode === barcode)) { showStatus('stock_status', 'Barcode exists.', true); return; }
+    
+    // Check if barcode already exists on a DIFFERENT product
+    if (barcode) {
+        const barcodeOwner = stock.find(i => i.barcode === barcode);
+        if (barcodeOwner && barcodeOwner.name.toLowerCase() !== name.toLowerCase()) {
+             showStatus('stock_status', 'Barcode used by other item.', true); return; 
+        }
+    }
     
     const existing = stock.find(i => i.name.toLowerCase() === name.toLowerCase());
+    
     if (existing) {
         showConfirmModal(`"${name}" exists. Add Qty?`, async () => {
-             existing.quantity += qty; if (barcode && !existing.barcode) existing.barcode = barcode;
-             await saveMainData(); showStatus('stock_status', `Added ${qty}.`); document.getElementById('quantity').value = '';
+             existing.quantity += qty; 
+             if (barcode) existing.barcode = barcode; // Update barcode if provided
+             if (price > 0) existing.purchasePrice = price; // Update price if provided
+             existing.category = cat; // Update category
+             
+             await saveMainData(); 
+             showStatus('stock_status', `Added ${qty} to existing.`); 
+             document.getElementById('quantity').value = '';
+             document.getElementById('product_name').value = '';
+             document.getElementById('barcode').value = '';
+             document.getElementById('purchase_price').value = '';
         });
     } else {
         stock.push({ id: Date.now(), name, barcode, category: cat, purchasePrice: price, quantity: qty });
-        await saveMainData(); showStatus('stock_status', `Saved.`);
-        document.getElementById('product_name').value = ''; document.getElementById('barcode').value = ''; document.getElementById('quantity').value = '';
+        await saveMainData(); showStatus('stock_status', `Saved new item.`);
+        document.getElementById('product_name').value = ''; document.getElementById('barcode').value = ''; document.getElementById('quantity').value = ''; document.getElementById('purchase_price').value = '';
     }
 }
 function renderInventory() {
@@ -519,11 +591,34 @@ function checkForUpdate() {
     if (window.electronAPI) window.electronAPI.checkForUpdate(); 
 }
 
+// NEW: DEEP CLEAN DELETE
 function promptResetAllData() { 
-    showConfirmModal("DELETE ALL DATA?", async () => { 
-        stock=[]; categories=["Other"]; apiKey=''; 
-        await saveMainData(); 
-        location.reload(); 
+    showConfirmModal("PERMANENTLY DELETE ALL DATA?", async () => { 
+        if(!shopDataRef) return;
+        
+        // Helper to delete a collection
+        const deleteCollection = async (collectionName) => {
+            const snapshot = await shopDataRef.collection(collectionName).get();
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+        };
+
+        try {
+            // Delete sub-collections
+            await deleteCollection('sales');
+            await deleteCollection('repairs');
+            await deleteCollection('recharges');
+            
+            // Reset main document fields
+            stock=[]; categories=["Other"]; apiKey=''; 
+            await saveMainData(); 
+            
+            alert("Data Wiped Successfully. Reloading...");
+            location.reload();
+        } catch (e) {
+            alert("Error wiping data: " + e.message);
+        }
     }); 
 }
 
@@ -575,7 +670,7 @@ function getReportData(start, end) {
     return { sales, repairs, recharges };
 }
 
-// --- AI FEATURES (FIXED VERSION TO v1) ---
+// --- AI FEATURES (v1 STABLE) ---
 async function getAIInsights() {
     if (!apiKey) { showStatus('report_status', 'No API Key.', true); return; }
     
@@ -595,7 +690,6 @@ async function getAIInsights() {
     Give me 3 brief bullet points on performance and 1 advice.`;
 
     try {
-        // USING v1 (STABLE) AND gemini-1.5-flash
         const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { 
             method: 'POST', 
             headers: {'Content-Type': 'application/json'}, 
@@ -633,7 +727,6 @@ async function getCustomAIInsight() {
     Answer briefly based on the data provided.`;
 
     try {
-        // USING v1 (STABLE) AND gemini-1.5-flash
         const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { 
             method: 'POST', 
             headers: {'Content-Type': 'application/json'}, 
@@ -661,7 +754,7 @@ function generatePDFReport() {
     const data = getReportData(periods.start, periods.end);
     const totalSales = data.sales.reduce((a,b)=>a+b.total,0);
     const totalProfit = data.sales.reduce((a,b)=>a+b.profit,0);
-    const totalRepairRevenue = data.repairs.reduce((a,b)=>a+b.sellPrice,0); // Changed to Sell Price
+    const totalRepairRevenue = data.repairs.reduce((a,b)=>a+b.sellPrice,0); 
 
     // Title
     doc.setFontSize(18);
@@ -675,7 +768,7 @@ function generatePDFReport() {
     doc.rect(14, 35, 180, 25, 'F');
     doc.text(`Total Sales: Rs. ${totalSales.toFixed(2)}`, 20, 45);
     doc.text(`Total Profit: Rs. ${totalProfit.toFixed(2)}`, 20, 55);
-    doc.text(`Repair Revenue: Rs. ${totalRepairRevenue.toFixed(2)}`, 100, 45); // Updated label
+    doc.text(`Repair Revenue: Rs. ${totalRepairRevenue.toFixed(2)}`, 100, 45);
 
     // Sales Table
     doc.text("Sales Details", 14, 70);
