@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClock(); 
     setInterval(updateClock, 1000); 
 
-    // --- DISPLAY VERSION NUMBER (Fixed) ---
+    // --- DISPLAY VERSION NUMBER ---
     if (window.electronAPI) {
         window.electronAPI.getAppVersion().then(version => {
             const sidebarEl = document.getElementById('version_display_sidebar');
@@ -84,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- UPDATER LOGIC ---
     if (window.electronAPI) {
-        // 1. Update Found -> Show Bell & Text
         window.electronAPI.onUpdateAvailable((info) => {
             updateInfo = info;
             showStatus('update_check_status', `New version v${info.version} found! Downloading...`);
@@ -99,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 };
             }
-            // Auto-trigger download modal if user manually checked in settings
             if(document.getElementById('settings') && !document.getElementById('settings').classList.contains('hidden')) {
                  const modal = document.getElementById('update_modal');
                  if(modal) {
@@ -109,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 2. Downloading -> Move Progress Bar
         window.electronAPI.onDownloadProgress((progressObj) => {
             const progressBar = document.getElementById('progress_bar');
             const updateDetails = document.getElementById('update_details');
@@ -120,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 3. Download Complete -> Show Restart Button
         window.electronAPI.onUpdateDownloaded(() => {
             const title = document.getElementById('update_title');
             const msg = document.getElementById('update_message');
@@ -138,12 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showStatus('update_check_status', 'Update ready. Restart required.');
         });
 
-        // 4. No Update -> Tell User
         window.electronAPI.onUpdateNotAvailable(() => {
             showStatus('update_check_status', 'You are on the latest version.', false);
         });
 
-        // 5. Error -> Tell User
         window.electronAPI.onUpdateError((err) => {
             console.error(err);
             showStatus('update_check_status', 'Update check failed.', true);
@@ -180,7 +174,6 @@ async function initializeAppAndListen(userId) {
             stock = data.stock || [];
             apiKey = data.apiKey || '';
             categories = data.categories || ["Mobile Accessory", "Repair Part", "Other"];
-            // If user is on a page that needs categories/stock, re-render it
             if(currentActivePage === 'add_stock' || currentActivePage === 'check_inventory' || currentActivePage === 'homepage') {
                 navigate(currentActivePage);
             }
@@ -215,7 +208,6 @@ function navigate(pageId) {
     if (targetPage) targetPage.classList.remove('hidden');
     
     document.querySelectorAll('.sidebar-btn').forEach(btn => btn.classList.remove('active'));
-    // Select based on onclick attribute to highlight correct button
     const activeButton = document.querySelector(`.sidebar-btn[onclick="navigate('${pageId}')"]`);
     if(activeButton) activeButton.classList.add('active');
     
@@ -407,11 +399,8 @@ function openEditStockModal(id) {
     document.getElementById('edit_barcode').value=i.barcode; 
     document.getElementById('edit_product_category').value=i.category; 
     document.getElementById('edit_purchase_price').value=i.purchasePrice; 
-    
-    // Bind the save button dynamically
     const saveBtn = document.getElementById('save_changes_btn');
     if(saveBtn) saveBtn.onclick = saveStockChanges;
-    
     document.getElementById('edit_stock_modal').classList.add('flex'); 
 }
 function closeEditStockModal() { editingItemId=null; document.getElementById('edit_stock_modal').classList.remove('flex'); }
@@ -426,10 +415,8 @@ function openSellPriceModal(p) {
     productForPriceEntry=p; 
     document.getElementById('sell_price_product_name').textContent=p.name; 
     document.getElementById('sell_price_input').value=Math.round(p.purchasePrice*1.5); 
-    
     const confirmBtn = document.getElementById('sell_price_confirm');
     confirmBtn.onclick = confirmSellPrice;
-
     document.getElementById('sell_price_modal').classList.add('flex'); 
     document.getElementById('sell_price_input').focus(); 
 }
@@ -588,7 +575,7 @@ function getReportData(start, end) {
     return { sales, repairs, recharges };
 }
 
-// --- AI FEATURES ---
+// --- AI FEATURES (FIXED VERSION TO v1) ---
 async function getAIInsights() {
     if (!apiKey) { showStatus('report_status', 'No API Key.', true); return; }
     
@@ -608,7 +595,8 @@ async function getAIInsights() {
     Give me 3 brief bullet points on performance and 1 advice.`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { 
+        // USING v1 (STABLE) AND gemini-1.5-flash
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { 
             method: 'POST', 
             headers: {'Content-Type': 'application/json'}, 
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
@@ -645,7 +633,8 @@ async function getCustomAIInsight() {
     Answer briefly based on the data provided.`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { 
+        // USING v1 (STABLE) AND gemini-1.5-flash
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { 
             method: 'POST', 
             headers: {'Content-Type': 'application/json'}, 
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
@@ -672,7 +661,7 @@ function generatePDFReport() {
     const data = getReportData(periods.start, periods.end);
     const totalSales = data.sales.reduce((a,b)=>a+b.total,0);
     const totalProfit = data.sales.reduce((a,b)=>a+b.profit,0);
-    const totalRepairs = data.repairs.reduce((a,b)=>a+b.cost,0);
+    const totalRepairRevenue = data.repairs.reduce((a,b)=>a+b.sellPrice,0); // Changed to Sell Price
 
     // Title
     doc.setFontSize(18);
@@ -686,7 +675,7 @@ function generatePDFReport() {
     doc.rect(14, 35, 180, 25, 'F');
     doc.text(`Total Sales: Rs. ${totalSales.toFixed(2)}`, 20, 45);
     doc.text(`Total Profit: Rs. ${totalProfit.toFixed(2)}`, 20, 55);
-    doc.text(`Repair Cost: Rs. ${totalRepairs.toFixed(2)}`, 100, 45);
+    doc.text(`Repair Revenue: Rs. ${totalRepairRevenue.toFixed(2)}`, 100, 45); // Updated label
 
     // Sales Table
     doc.text("Sales Details", 14, 70);
