@@ -1,0 +1,38 @@
+{
+  "name": "mahavir-financial-report",
+  "version": "1.1.1",
+  "description": "Inventory management for Mahavir Mobile Shop",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kavyajain933-code/Mahavir-Financial-Report.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.mahavir.shop.app",
+    "publish": {
+      "provider": "github",
+      "owner": "kavyajain933-code",
+      "repo": "Mahavir-Financial-Report"
+    },
+    "win": {
+      "verifyUpdateCodeSignature": false
+    },
+    "artifactName": "mahavir-shop-setup-${version}.${ext}"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^31.2.1",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-log": "^5.1.5",
+    "electron-updater": "^6.2.1"
+  }
+}
+
