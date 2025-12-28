@@ -1,6 +1,6 @@
 {
   "name": "mahavir-financial-report",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Inventory management for Mahavir Mobile Shop",
   "main": "main.js",
   "repository": {
@@ -31,8 +31,8 @@
     "electron-builder": "^24.13.3"
   },
   "dependencies": {
+    "electron-is-dev": "^3.0.1",
     "electron-log": "^5.1.5",
     "electron-updater": "^6.2.1"
   }
 }
-

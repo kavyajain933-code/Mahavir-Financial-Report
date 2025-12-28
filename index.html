@@ -4,21 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mahavir Mobile Shop</title>
-    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <!-- Local Stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-900 text-gray-200 font-sans">
 
-    <!-- NEW: Container for the animated geometric background -->
     <div class="area">
         <ul class="circles">
             <li></li><li></li><li></li><li></li><li></li>
@@ -26,7 +22,6 @@
         </ul>
     </div >
 
-    <!-- Loading Screen -->
     <div id="loading_container" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
         <div class="text-center">
             <h1 class="text-3xl font-bold text-green-400 mb-4">Mahavir Mobile Shop</h1>
@@ -34,7 +29,6 @@
         </div>
     </div>
 
-    <!-- Auth Screen -->
     <div id="auth_container" class="hidden fixed inset-0 bg-gray-900 flex items-center justify-center z-40">
         <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-sm">
             <h2 class="text-2xl font-bold text-center text-green-400 mb-6">Welcome</h2>
@@ -55,10 +49,9 @@
         </div>
     </div>
     
-    <!-- Main App -->
     <div id="main_app_container" class="flex h-screen hidden">
-        <!-- Sidebar -->
         <div class="w-72 bg-gray-800 p-5 flex flex-col fixed h-full shadow-lg">
+            <p id="version_display_sidebar" class="text-xs text-gray-500 text-center mb-1">v...</p>
             <div id="clock" class="text-center text-2xl font-semibold text-gray-400 mb-2"></div>
             <h1 class="text-2xl font-bold mb-2 text-center text-green-400">Mahavir Mobile Shop</h1>
             <div class="text-center text-gray-400 text-sm truncate mb-4" id="user_email_display"></div>
@@ -90,10 +83,8 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <main class="flex-1 ml-72 p-8 overflow-y-auto relative">
             
-            <!-- Update Notification Bell -->
             <div id="update_notification_bell" class="hidden fixed top-6 right-8 cursor-pointer">
                 <div class="bell-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-bell-fill text-yellow-400" viewBox="0 0 16 16">
@@ -388,6 +379,7 @@
                         <button onclick="checkForUpdate()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-6 rounded-md">Check for Updates</button>
                         <p id="update_check_status" class="text-gray-400 h-6"></p>
                     </div>
+                    <p id="version_display_settings" class="text-sm text-gray-500 mt-2">Current Version: ...</p>
 
                     <hr class="border-gray-600 my-6">
 
@@ -423,7 +415,6 @@
         </main>
     </div>
     
-    <!-- Modals -->
     <div id="category_manager_modal" class="fixed inset-0 bg-black bg-opacity-50 modal items-center justify-center p-4 z-50">
         <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
             <h2 class="text-xl font-bold mb-4">Manage Categories</h2>
@@ -537,4 +528,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-

@@ -34,6 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClock(); 
     setInterval(updateClock, 1000); 
 
+    // --- NEW: DISPLAY VERSION NUMBER ---
+    if (window.electronAPI) {
+        window.electronAPI.getAppVersion().then(version => {
+            const sidebarEl = document.getElementById('version_display_sidebar');
+            const settingsEl = document.getElementById('version_display_settings');
+            if (sidebarEl) sidebarEl.textContent = `v${version}`;
+            if (settingsEl) settingsEl.textContent = `Current Version: v${version}`;
+        });
+    }
+
     const loginBtn = document.getElementById('login_button');
     const signupBtn = document.getElementById('signup_button');
     const logoutBtn = document.getElementById('logout_button');
@@ -72,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // --- UPDATER LOGIC (RESTORED) ---
+    // --- UPDATER LOGIC ---
     if (window.electronAPI) {
         // 1. Update Found -> Show Bell & Text
         window.electronAPI.onUpdateAvailable((info) => {
@@ -82,13 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (bell) {
                 bell.classList.remove('hidden');
                 bell.onclick = () => {
-                    // If user clicks bell, ensure download starts (if not auto) or show progress
                     const modal = document.getElementById('update_modal');
                     modal.classList.add('flex');
                     window.electronAPI.startDownload();
                 };
             }
-            // Auto-trigger download modal if user manually checked
+            // Auto-trigger download modal if user manually checked in settings
             if(document.getElementById('settings').classList.contains('hidden') === false) {
                  const modal = document.getElementById('update_modal');
                  modal.classList.add('flex');
